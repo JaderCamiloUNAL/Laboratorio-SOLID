@@ -47,3 +47,233 @@ Laboratorio numero 2 de la matera de ingenieria de software
   La conexión a Oracle y el envío de SMS están simulados con mensajes en consola, pero
   imaginen que son reales: cada vez que se ejecutan, el sistema se conecta a la base de datos de
   producción y le llega un mensaje de texto al cliente.
+
+-----------------------------------------------------------
+
+## Recorrido del laboratorio
+
+| Bloque | Qué van a hacer |
+|---|---|
+| 0. Arranque | Preparar el proyecto y conocer el dominio |
+| 1. Diagnóstico | Encontrar los problemas y medir el “antes” |
+| 2. Refactorización | Corregir el sistema con puntos de control S, O, L, I, D |
+| 3. Pruebas unitarias | Probar el diseño nuevo con dobles de prueba |
+| 4. Negocio pidió cambios | Implementar requerimientos que no conocían |
+| 5. Revisión cruzada | Extender el código de otra pareja |
+| 6. Cierre | UML final, comparación y reflexión |
+
+## Glosario bancario
+
+| Término | Significado en este laboratorio |
+|---|---|
+| Cuenta de ahorros | Cuenta en la que el cliente deposita, retira y transfiere dinero libremente. |
+| CDT | Certificado de Depósito a Término. El cliente deja un dinero “congelado” hasta una fecha de vencimiento a cambio de intereses. No permite retiros antes de esa fecha. |
+| Cuota de manejo | Valor mensual que el banco cobra por mantener una cuenta. |
+| Transferencia interbancaria | Transferencia hacia una cuenta de otro banco. Tiene comisión. |
+| Avance | Retiro de efectivo con cargo al cupo de una tarjeta de crédito. |
+| Extracto | Resumen del estado de un producto (saldo, deuda, etc.). |
+
+## Bloque 0 — Arranque
+
+Preparar el proyecto y entender qué hace el sistema antes de juzgarlo.
+
+1. Creen el proyecto en el lenguaje elegido y copien (o traduzcan) el código base.
+2. Ejecuten el programa principal y guarden su salida en un archivo `salida_original.txt`.
+La usarán en el bloque 2 para comprobar que no cambiaron el comportamiento.
+
+3. Lean el código completo una vez, sin tomar notas, solo para entender el flujo de una transferencia.
+
+**Commit:** `bloque-0-codigo-base`
+
+## Bloque 1 — Diagnóstico
+
+Encontrar los problemas de diseño y medir cómo está el sistema antes de tocarlo.
+
+### 1.1 Tabla de hallazgos
+
+En el código hay al menos un problema por cada letra de SOLID, y algunas clases tienen más de uno. Encuéntrenlos y regístrenlos en una tabla como esta en su README:
+
+| Clase / método | Letra | Evidencia en el código | Consecuencia para el banco o el cliente |
+|---|---|---|---|
+| | | | |
+
+### Sobre la columna “consecuencia”
+
+No escriban “viola el SRP”. Escriban qué le pasa al negocio. Por ejemplo: “si mañana cambia el texto del SMS hay que tocar la misma clase que mueve el dinero, y un error ahí puede cobrar mal una transferencia”.
+
+### 1.2 Dos experimentos
+
+1. El CDT. Modifiquen temporalmente el programa principal para que el cobro de la cuota de manejo incluya el CDT de Ana. ¿Qué pasa? ¿Qué pasaría en producción si el proceso de cobro corre de noche para un millón de cuentas y la cuenta número 500 000 es un CDT?
+
+2. La prueba imposible. Intenten escribir una prueba unitaria que verifique que una transferencia a otro banco cobra $7.500 de comisión, con una condición: la prueba no puede conectarse a Oracle ni enviar un SMS. ¿Lo lograron? ¿Qué les impide hacerlo?
+
+### 1.3 Medición “antes”
+
+| Métrica | Antes |
+|---|---|
+| Líneas del método transferir | |
+| Número de razones distintas por las que TransaccionService podría cambiar | |
+| Clases concretas que TransaccionService crea con new | |
+| Métodos vacíos o que lanzan excepción por “no aplica” | |
+| ¿Se puede probar transferir sin Oracle ni SMS? (Sí/No) | |
+
+### 1.4 Diagrama de clases del código original
+
+Dibujen el diagrama de clases UML del código base: clases, interfaces, herencia, implementación y dependencias (new). Puede ser a mano (foto) o con cualquier herramienta (draw.io, PlantUML, Mermaid, etc.). Marquen en rojo las dependencias o herencias que consideren problemáticas.
+
+**Commit:** `bloque-1-diagnostico`
+
+## Bloque 2 — Refactorización
+
+Corregir el sistema completo, un principio a la vez, sin cambiar su comportamiento.
+
+Trabajen en el orden de los puntos de control. Al terminar cada uno: (1) ejecuten el programa y comparen la salida con salida_original.txt, (2) respondan la pregunta de control en su README y (3) hagan el commit.
+
+Tip: compara la salida automáticamente. En Linux o macOS: `diff salida_original.txt salida_nueva.txt`. En Windows (PowerShell): `Compare-Object (gc salida_original.txt) (gc salida_nueva.txt)`. Solo deberían cambiar la fecha y la hora de la auditoría. A esta técnica se le llama prueba de caracterización: antes de refactorizar código sin pruebas, se “congela” lo que hace hoy para detectar cualquier cambio accidental.
+
+### Punto de control S
+
+Separen las responsabilidades que hoy están mezcladas en TransaccionService.transferir.
+
+#### Pregunta de control
+
+Después del cambio, describan en una frase qué hace TransaccionService. ¿Aparece la palabra “y”? Si el área legal pide cambiar el formato del comprobante, ¿qué archivo tocan?
+
+**Commit:** `control-S`
+
+### Punto de control O
+
+Hoy, agregar un tipo de transferencia obliga a editar el switch. Cámbienlo para que un tipo nuevo se agregue creando código, no editando el existente.
+
+#### Pregunta de control
+
+Si mañana llega un tipo de transferencia nuevo, ¿qué archivos existentes tendrían que modificar? Enumérenlos. Lo ideal es que solo aparezca el punto donde se arma el sistema (el programa principal).
+
+**Commit:** `control-O`
+
+### Punto de control L
+
+Corrijan la jerarquía de cuentas para que el cobro de cuota de manejo nunca pueda explotar por culpa de un CDT.
+
+#### Pregunta de control
+
+¿Su solución detecta el error al compilar (o con el verificador de tipos de su lenguaje) o al ejecutar? ¿Por qué es mejor lo primero? Si alguien propone “envolver el retiro en un try/catch e ignorar los CDT”, ¿por qué eso no resuelve el problema de diseño?
+
+**Commit:** `control-L`
+
+### Punto de control I
+
+Corrijan ProductoBancario para que ningún producto tenga que implementar métodos que no le aplican.
+
+#### Pregunta de control
+
+¿Pudieron lograr que un mismo generador de extractos funcione para cuentas, tarjetas y créditos a la vez? ¿Qué interfaz necesitó para eso, y por qué no necesitó conocer los demás métodos de cada producto?
+
+**Commit:** `control-I`
+
+### Punto de control D
+
+Hagan que TransaccionService deje de crear sus dependencias con new y que dependa de abstracciones. Todo el “armado” del sistema debe quedar en un solo lugar (el programa principal).
+
+#### Pregunta de control
+
+¿Cuántas clases concretas conoce ahora TransaccionService? ¿Quién decide si se usa Oracle o si se notifica por SMS? Vuelvan al experimento 2 del bloque 1: ¿ya es posible esa prueba?
+
+**Commit:** `control-D`
+
+## Bloque 3 — Pruebas unitarias
+
+Demostrar que el diseño nuevo se puede probar sin base de datos, sin SMS y en milisegundos.
+
+Dobles de prueba. Un doble de prueba es una implementación falsa de una abstracción, hecha solo para las pruebas. Por ejemplo, un repositorio que guarda las transacciones en una lista en memoria en vez de en Oracle, o un notificador que anota los mensajes en vez de enviarlos. Solo es posible usarlos si la clase que se prueba depende de abstracciones (punto de control D). Si en su lenguaje usan un framework de mocks (Mockito, unittest.mock, Moq, Jest, Vitest, flutter_test, XCTest, go test, etc.), también es válido.
+
+Usen el framework de pruebas de su lenguaje (JUnit, pytest, xUnit, Jest, Vitest, flutter_test, XCTest, go test, etc.) y escriban como mínimo estas pruebas:
+
+1. Una transferencia al mismo banco no cobra comisión y mueve exactamente el monto entre las dos cuentas.
+2. Una transferencia a otro banco cobra $7.500 de comisión y descuenta monto + comisión de la cuenta de origen.
+3. Si el saldo es insuficiente, la transferencia se rechaza y no se guarda nada ni se notifica al cliente.
+4. Cada transferencia exitosa se guarda una sola vez y genera una sola notificación.
+5. Un tipo de transferencia desconocido se rechaza y el saldo de la cuenta de origen no cambia.
+
+#### Pregunta de control
+
+¿Cuánto tardan en ejecutarse todas sus pruebas? ¿Cuántas líneas de TransaccionService tuvieron que cambiar para poder probarla? ¿Qué habría pasado si intentaran estas mismas pruebas en el bloque 1?
+
+**Commit:** `bloque-3-pruebas`
+
+## Bloque 4 — “Negocio pidió cambios”
+
+Poner a prueba el diseño con requerimientos que no conocían.
+
+Al iniciar este bloque, el docente les entregará una hoja con cinco requerimientos nuevos del área de negocio. Para cada uno:
+
+1. Antes de programar, miren el código original (está en el commit bloque-0-codigo-base) y estimen cuántos archivos existentes habría que modificar allí.
+2. Implementen el requerimiento sobre su código refactorizado.
+3. Registren cuántos archivos existentes modificaron realmente y cuántos archivos nuevos crearon.
+4. Ejecuten las pruebas del bloque 3: deben seguir pasando.
+
+| Req. | Archivos a modificar en el código original (estimado) | Archivos existentes modificados (real) | Archivos nuevos | ¿Se rompió alguna prueba? |
+|---|---|---|---|---|
+| R1 | | | | |
+| R2 | | | | |
+| R3 | | | | |
+| R4 | | | | |
+| R5 | | | | |
+
+**Commit:** uno por requerimiento: `req-1`, `req-2`, . . . , `req-5`
+
+## Bloque 5 — Revisión cruzada
+
+Comprobar si el diseño es fácil de extender para alguien que no lo escribió.
+
+1. Intercambien su repositorio con otra pareja (el docente indica con cuál). No pueden explicarle su código: el código debe explicarse solo.
+2. El docente entregará un requerimiento nuevo. Impleméntenlo sobre el código de la otra pareja.
+3. Llenen la lista de revisión y entréguensela a la otra pareja.
+
+### Lista de revisión
+
+| Lista de revisión | Sí | No |
+|---|---|---|
+| Entendimos qué hace cada clase leyendo solo su nombre y sus métodos públicos. | | |
+| Pudimos reutilizar piezas existentes sin copiar y pegar código. | | |
+| Implementamos el requerimiento sin modificar la lógica de clases existentes. | | |
+| No encontramos métodos vacíos ni que lancen “no aplica”. | | |
+| No encontramos if/switch por tipo que tuvimos que extender. | | |
+| Las pruebas existentes siguieron pasando después de nuestro cambio. | | |
+| No encontramos abstracciones innecesarias (interfaces que no aportan). | | |
+
+**Lo mejor del diseño:**
+
+**Lo que nos costó entender o extender:**
+
+**Commit (en el repositorio de la otra pareja, en una rama):** `revision-cruzada`
+
+## Bloque 6 — Cierre
+
+Ver el cambio completo y reflexionar sobre lo aprendido.
+
+1. Dibujen el diagrama de clases UML del código final y pónganlo al lado del diagrama del bloque 1.
+
+2. Completen la tabla comparativa:
+
+| Métrica | Antes | Después |
+|---|---|---|
+| Líneas del método transferir | | |
+| Razones distintas por las que TransaccionService podría cambiar | | |
+| Clases concretas que TransaccionService crea con new | | |
+| Métodos vacíos o que lanzan “no aplica” | | |
+| ¿Se puede probar transferir sin Oracle ni SMS? | | |
+| Número total de archivos | | |
+| Archivos existentes modificados en total en el bloque 4 | | |
+
+3. Respondan en su README:
+
+**(a)** El código final tiene muchos más archivos que el original. ¿Es eso un problema? ¿En qué situación sí lo sería?
+
+**(b)** ¿En qué requerimiento del bloque 4 se notó más la diferencia entre el código original y el refactorizado? ¿Por qué?
+
+**(c)** ¿Hubo algún requerimiento que su diseño no aguantó bien? ¿Qué cambiarían?
+
+**(d)** ¿Qué les dijo la otra pareja en la revisión cruzada? ¿Están de acuerdo?
+
+**(e)** Si tuvieran que convencer a su jefe de invertir dos semanas en refactorizar el backend real del banco, ¿qué argumento usarían, basándose en los datos de hoy?
