@@ -277,3 +277,89 @@ Ver el cambio completo y reflexionar sobre lo aprendido.
 **(d)** ¿Qué les dijo la otra pareja en la revisión cruzada? ¿Están de acuerdo?
 
 **(e)** Si tuvieran que convencer a su jefe de invertir dos semanas en refactorizar el backend real del banco, ¿qué argumento usarían, basándose en los datos de hoy?
+
+---------------------------
+# Complementos
+
+“Buenas tardes, equipo. Estos son los cambios priorizados para el próximo lanzamiento de
+la app. Gracias por su apoyo.” — Gerencia de Canales Digitales
+
+Recuerden: antes de programar cada requerimiento, estimen cuántos archivos habría que
+modificar en el código original. Después, implementen sobre su código refactorizado y registren
+los datos reales en la tabla del bloque 4.
+
+## R1 Transferencias por llave
+
+Los clientes podrán transferir usando una llave (su número de celular o su cédula) en
+lugar del número de cuenta. Estas transferencias son inmediatas y no tienen comisión.
+
+**Criterio de aceptación:** una transferencia de tipo LLAVE por $50.000 descuenta exacta-
+mente $50.000 de la cuenta de origen. (Para este laboratorio no es necesario implementar
+
+la búsqueda de la cuenta a partir de la llave.)
+
+## R2 Cuenta infantil
+
+Nuevo producto para menores de edad: la cuenta infantil. Recibe depósitos sin límite,
+pero sus retiros no pueden superar $200.000 en un mismo día. Se debe poder usar
+como origen de transferencias y se le cobra la cuota de manejo como a cualquier cuenta.
+
+**Criterio de aceptación:** si la cuenta ya retiró $150.000 hoy, un retiro de $60.000 se
+rechaza y el saldo no cambia.
+
+## R3 Notificaciones push
+
+Además del SMS, el cliente debe recibir una notificación push en la app por cada
+transferencia.
+
+**Criterio de aceptación:** por cada transferencia exitosa aparecen en consola un mensaje
+[SMS] y un mensaje [PUSH].
+
+## R4 Sistema antifraude
+
+Por regulación, cada transacción exitosa debe enviarse al sistema antifraude del banco
+(simulado con un mensaje en consola que empiece con [ANTIFRAUDE]). La auditoría actual
+se mantiene.
+
+**Criterio de aceptación:** por cada transferencia exitosa aparecen un mensaje
+[AUDITORIA] y uno [ANTIFRAUDE]. Una transferencia rechazada no genera ninguno.
+
+## R5 Migración a PostgreSQL
+
+El banco dejará de pagar la licencia de Oracle. Las transacciones se guardarán en Post-
+greSQL (simulado con [POSTGRES]). La clase de Oracle no se borra: se conserva por si
+
+hay que devolverse durante la migración.
+
+**Criterio de aceptación:** el programa guarda en PostgreSQL y las pruebas unitarias no
+cambian.
+
+## Bloque 5 Requerimiento para la revisión cruzada
+
+Este requerimiento se implementa sobre el código de la otra pareja, sin pedirles ex-
+plicaciones. Si no entienden algo, anótenlo en la lista de revisión: esa es justamente la retroalimentación que les sirve.
+
+## R6 Pago de servicios públicos
+
+Los clientes podrán pagar sus facturas de servicios públicos (agua, luz, gas, internet) desde
+una cuenta, indicando la referencia de la factura y el valor.
+
+El pago tiene una comisión fija de $1.500.
+
+Aplican las mismas validaciones de monto que en las transferencias.
+
+Como cualquier transacción, el pago se guarda, genera comprobante, notifica al cliente
+y pasa por auditoría y antifraude.
+
+Un CDT no puede pagar servicios.
+
+**Criterio de aceptación:** un pago de $184.300 descuenta $185.800 de la cuenta, guarda
+la transacción e imprime el comprobante con la referencia de la factura como destino.
+
+**Restricción:** no se permite copiar y pegar la lógica de TransaccionService. Deben
+reutilizar las piezas que la otra pareja ya construyó.
+
+## Para pensar mientras lo implementan
+
+¿Cuántas de las piezas que necesitan ya existían en el código de la otra pareja? ¿Pudie-
+ron usarlas tal como estaban, o tuvieron que modificarlas? Eso dice mucho de qué tan reutilizable quedó su diseño (y el de ustedes).
