@@ -223,9 +223,18 @@ Tip: compara la salida automáticamente. En Linux o macOS: `diff salida_original
 
 Separen las responsabilidades que hoy están mezcladas en TransaccionService.transferir.
 
+#### Comparacion de salida
+- InputObject                                                                   SideIndicator
+-----------                                                                   -------------
+[AUDITORIA] 2026-10-03T18:10:07.912531800 OTRO_BANCO 001-1 -> 001-2 $150000.0 =>
+
+[AUDITORIA] 2026-10-01T17:18:12.308827743 OTRO_BANCO 001-1 -> 001-2 $150000.0 <=
+
 #### Pregunta de control
 
-Después del cambio, describan en una frase qué hace TransaccionService. ¿Aparece la palabra “y”? Si el área legal pide cambiar el formato del comprobante, ¿qué archivo tocan?
+ - Después del cambio, describan en una frase qué hace TransaccionService. ¿Aparece la palabra “y”? Si el área legal pide cambiar el formato del comprobante, ¿qué archivo tocan?
+     - TransaccionService coordina el proceso de una transferencia (validación, comisión y movimiento de dinero).
+     - Si el área legal pide cambiar el formato del comprobante, solo se toca el archivo ComprobanteConsola.java.
 
 **Commit:** `control-S`
 
