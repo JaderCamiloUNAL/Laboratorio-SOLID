@@ -223,7 +223,7 @@ Tip: compara la salida automáticamente. En Linux o macOS: `diff salida_original
 
 Separen las responsabilidades que hoy están mezcladas en TransaccionService.transferir.
 
-#### Comparacion de salida
+#### Comparación de salida
 - InputObject                                                                   SideIndicator
 -----------                                                                   -------------
 [AUDITORIA] 2026-10-03T18:10:07.912531800 OTRO_BANCO 001-1 -> 001-2 $150000.0 =>
@@ -242,9 +242,17 @@ Separen las responsabilidades que hoy están mezcladas en TransaccionService.tra
 
 Hoy, agregar un tipo de transferencia obliga a editar el switch. Cámbienlo para que un tipo nuevo se agregue creando código, no editando el existente.
 
+#### Comparación de salida
+InputObject                                                                   SideIndicator
+-----------                                                                   -------------
+[AUDITORIA] 2026-10-03T18:28:59.851162 OTRO_BANCO 001-1 -> 001-2 $150000.0    =>
+
+[AUDITORIA] 2026-10-01T17:18:12.308827743 OTRO_BANCO 001-1 -> 001-2 $150000.0 <=
+
 #### Pregunta de control
 
-Si mañana llega un tipo de transferencia nuevo, ¿qué archivos existentes tendrían que modificar? Enumérenlos. Lo ideal es que solo aparezca el punto donde se arma el sistema (el programa principal).
+- Si mañana llega un tipo de transferencia nuevo, ¿qué archivos existentes tendrían que modificar? Enumérenlos. Lo ideal es que solo aparezca el punto donde se arma el sistema (el programa principal).
+    - Solo se modificaría Main.java (el lugar donde se arma el sistema).
 
 **Commit:** `control-O`
 
