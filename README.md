@@ -260,9 +260,19 @@ InputObject                                                                   Si
 
 Corrijan la jerarquía de cuentas para que el cobro de cuota de manejo nunca pueda explotar por culpa de un CDT.
 
+#### Comparación  de salida
+InputObject                                                                   SideIndicator
+-----------                                                                   -------------
+[AUDITORIA] 2026-10-03T18:39:52.728209700 OTRO_BANCO 001-1 -> 001-2 $150000.0 =>
+
+[AUDITORIA] 2026-10-01T17:18:12.308827743 OTRO_BANCO 001-1 -> 001-2 $150000.0 <=
+
 #### Pregunta de control
 
-¿Su solución detecta el error al compilar (o con el verificador de tipos de su lenguaje) o al ejecutar? ¿Por qué es mejor lo primero? Si alguien propone “envolver el retiro en un try/catch e ignorar los CDT”, ¿por qué eso no resuelve el problema de diseño?
+- ¿Su solución detecta el error al compilar (o con el verificador de tipos de su lenguaje) o al ejecutar? ¿Por qué es mejor lo primero? Si alguien propone “envolver el retiro en un try/catch e ignorar los CDT”, ¿por qué eso no resuelve el problema de diseño?
+  - La solución detecta el error al compilar.
+  - Es mejor porque el fallo se descubre en tiempo de desarrollo, no a las 3 a.m. cuando corre el proceso batch de un millón de cuentas.
+  - Envolver el retiro en un try/catch e ignorar los CDT no resuelve el problema de diseño: sigue permitiendo que un CDT se trate como si fuera una cuenta que soporta cobro de cuota, viola el contrato de la jerarquía y oculta el error en lugar de hacerlo imposible.
 
 **Commit:** `control-L`
 
