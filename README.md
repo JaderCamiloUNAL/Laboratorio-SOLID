@@ -94,8 +94,12 @@ Encontrar los problemas de diseño y medir cómo está el sistema antes de tocar
 En el código hay al menos un problema por cada letra de SOLID, y algunas clases tienen más de uno. Encuéntrenlos y regístrenlos en una tabla como esta en su README:
 
 | Clase / método | Letra | Evidencia en el código | Consecuencia para el banco o el cliente |
-|---|---|---|---|
-| | | | |
+| :--- | :--- | :--- | :--- |
+| `TransaccionService` / `transferir` | **S** | Mezcla validación, comisiones, movimientos, conexión a Oracle, comprobante en consola y SMS. | Si cambia el formato del SMS o la base de datos, se toca la lógica financiera, arriesgando un error en el dinero de los clientes. |
+| `TransaccionService` / `transferir` | **O** | El cálculo de la comisión usa un `switch (tipo)` quemado en el código. | Agregar un nuevo tipo de transferencia obliga a modificar y arriesgar el código central, en lugar de solo añadir código nuevo. |
+| `CDT` / `retirar` | **L** | Hereda de `Cuenta`, pero lanza `UnsupportedOperationException` si se retira antes de tiempo. | El cobro nocturno a un millón de cuentas fallará y se detendrá al llegar a un CDT, dejando cuentas sin cobrar. |
+| `TarjetaCredito` y `CreditoVivienda` / `depositar`, `retirar` | **I** | Implementan la interfaz `ProductoBancario` dejando métodos vacíos o que dicen "// no aplica". | Productos de crédito están acoplados a operaciones de cuentas de ahorro; cambios en retiros pueden obligar a alterar tarjetas. |
+| `TransaccionService` / Atributos | **D** | Crea `new OracleRepositorio()` y `new SmsGateway()` directamente. | Es imposible probar el cálculo de comisiones sin conectarse a la base de datos de producción o enviarle SMS reales al cliente. |
 
 ### Sobre la columna “consecuencia”
 
@@ -104,22 +108,106 @@ No escriban “viola el SRP”. Escriban qué le pasa al negocio. Por ejemplo: �
 ### 1.2 Dos experimentos
 
 1. El CDT. Modifiquen temporalmente el programa principal para que el cobro de la cuota de manejo incluya el CDT de Ana. ¿Qué pasa? ¿Qué pasaría en producción si el proceso de cobro corre de noche para un millón de cuentas y la cuenta número 500 000 es un CDT?
+- Al incluir el CDT de Ana en el cobro de la cuota de manejo, el programa lanza la excepción UnsupportedOperationException y se cae de inmediato. En producción, si este cobro se lanza de madrugada para millones de cuentas, el proceso fallaría a la mitad. Todos los clientes después de ese CDT no recibirían el cobro de la cuota.
 
 2. La prueba imposible. Intenten escribir una prueba unitaria que verifique que una transferencia a otro banco cobra $7.500 de comisión, con una condición: la prueba no puede conectarse a Oracle ni enviar un SMS. ¿Lo lograron? ¿Qué les impide hacerlo?
+- No se pudo hacer. El impedimento principal es que TransaccionService instancia directamente (new) a OracleRepositorio y SmsGateway. Como no podemos inyectarle mocks, siempre va a intentar imprimir los mensajes de Oracle y SMS en consola, simulando que va a producción.
 
 ### 1.3 Medición “antes”
 
 | Métrica | Antes |
 |---|---|
-| Líneas del método transferir | |
-| Número de razones distintas por las que TransaccionService podría cambiar | |
-| Clases concretas que TransaccionService crea con new | |
-| Métodos vacíos o que lanzan excepción por “no aplica” | |
-| ¿Se puede probar transferir sin Oracle ni SMS? (Sí/No) | |
+| Líneas del método transferir | 34 |
+| Número de razones distintas por las que TransaccionService podría cambiar | 6 (Validaciones, comisiones, lógica de cuenta, persistencia, consola, notificaciones) |
+| Clases concretas que TransaccionService crea con new | 2 (OracleRepositorio, SmsGateway) |
+| Métodos vacíos o que lanzan excepción por “no aplica” | 5 |
+| ¿Se puede probar transferir sin Oracle ni SMS? (Sí/No) | No |
 
 ### 1.4 Diagrama de clases del código original
 
 Dibujen el diagrama de clases UML del código base: clases, interfaces, herencia, implementación y dependencias (new). Puede ser a mano (foto) o con cualquier herramienta (draw.io, PlantUML, Mermaid, etc.). Marquen en rojo las dependencias o herencias que consideren problemáticas.
+
+```mermaid
+classDiagram
+    class Cuenta {
+        #String numero
+        #String titular
+        #double saldo
+        +getNumero() String
+        +getTitular() String
+        +getSaldo() double
+        +depositar(monto: double)
+        +retirar(monto: double)
+    }
+
+    class CuentaAhorros {
+    }
+
+    class CDT {
+        -LocalDate vencimiento
+        +retirar(monto: double)
+    }
+
+    class ProductoBancario {
+        <<interface>>
+        +depositar(monto: double)
+        +retirar(monto: double)
+        +calcularIntereses() double
+        +pagarCuota(monto: double)
+        +generarExtracto() String
+    }
+
+    class TarjetaCredito {
+        -double deuda
+        -double cupo
+        +depositar(monto: double)
+        +retirar(monto: double)
+        +calcularIntereses() double
+        +pagarCuota(monto: double)
+        +generarExtracto() String
+    }
+
+    class CreditoVivienda {
+        -double saldoPendiente
+        +depositar(monto: double)
+        +retirar(monto: double)
+        +calcularIntereses() double
+        +pagarCuota(monto: double)
+        +generarExtracto() String
+    }
+
+    class TransaccionService {
+        -OracleRepositorio repositorio
+        -SmsGateway sms
+        +transferir(origen: Cuenta, destino: Cuenta, monto: double, tipo: String)
+    }
+
+    class OracleRepositorio {
+        +guardarTransaccion(origen, destino, monto, comision)
+    }
+
+    class SmsGateway {
+        +enviar(destinatario, mensaje)
+    }
+
+    class CobroCuotaManejo {
+        -double CUOTA
+        +cobrarMensual(cuentas: List~Cuenta~)
+    }
+
+    Cuenta <|-- CuentaAhorros : Herencia
+    Cuenta <|-- CDT : Herencia (Problemática - L)
+    
+    ProductoBancario <|.. TarjetaCredito : Implementa
+    ProductoBancario <|.. CreditoVivienda : Implementa (Problemática - I)
+    
+    TransaccionService --> OracleRepositorio : Dependencia Directa (Problemática - D)
+    TransaccionService --> SmsGateway : Dependencia Directa (Problemática - D)
+    TransaccionService --> Cuenta : Usa
+    
+    CobroCuotaManejo --> Cuenta : Usa
+```
+
 
 **Commit:** `bloque-1-diagnostico`
 
