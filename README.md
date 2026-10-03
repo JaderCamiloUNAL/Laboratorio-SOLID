@@ -225,7 +225,9 @@ Separen las responsabilidades que hoy están mezcladas en TransaccionService.tra
 
 #### Pregunta de control
 
-Después del cambio, describan en una frase qué hace TransaccionService. ¿Aparece la palabra “y”? Si el área legal pide cambiar el formato del comprobante, ¿qué archivo tocan?
+ - Después del cambio, describan en una frase qué hace TransaccionService. ¿Aparece la palabra “y”? Si el área legal pide cambiar el formato del comprobante, ¿qué archivo tocan?
+     - TransaccionService coordina el proceso de una transferencia (validación, comisión y movimiento de dinero).
+     - Si el área legal pide cambiar el formato del comprobante, solo se toca el archivo ComprobanteConsola.java.
 
 **Commit:** `control-S`
 
