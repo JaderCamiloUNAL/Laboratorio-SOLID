@@ -264,10 +264,20 @@ InputObject                                                                     
 
 Hagan que TransaccionService deje de crear sus dependencias con new y que dependa de abstracciones. Todo el “armado” del sistema debe quedar en un solo lugar (el programa principal).
 
+#### Comparación salida
+InputObject                                                                   SideIndicator
+-----------                                                                   -------------
+[AUDITORIA] 2026-10-04T11:09:55.814500300 OTRO_BANCO 001-1 -> 001-2 $150000.0 =>
+
+[AUDITORIA] 2026-10-01T17:18:12.308827743 OTRO_BANCO 001-1 -> 001-2 $150000.0 <=
+
 #### Pregunta de control
 
-¿Cuántas clases concretas conoce ahora TransaccionService? ¿Quién decide si se usa Oracle o si se notifica por SMS? Vuelvan al experimento 2 del bloque 1: ¿ya es posible esa prueba?
-
+- ¿Cuántas clases concretas conoce ahora TransaccionService? ¿Quién decide si se usa Oracle o si se notifica por SMS? Vuelvan al experimento 2 del bloque 1: ¿ya es posible esa prueba?
+  - Ahora TransaccionService no conoce ninguna clase concreta porque ahora depende de abstracciones (*Repositorio*, *GeneradorComprobante* ,*Notificador* y *Auditor*) y no de implementaciones concretas.
+  - El *Main* es el que decide que implementaciones utilizar porque alli se construyen y se pasan las dependencias a *TransaccionService*
+  - Con los nuevos codigos ya es posible realizar la prueba del experimento 2 del bloque 1 ya que al depender de abstracciones se pueden reemplazar las implementaciones reales por otras pruebas sin modificar *TransaccionService*
+ 
 **Commit:** `control-D`
 
 ## Bloque 3 — Pruebas unitarias
