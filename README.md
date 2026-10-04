@@ -322,9 +322,9 @@ Al iniciar este bloque, el docente les entregará una hoja con cinco requerimien
 |---|---|---|---|---|
 | **R1** | `TransaccionService.java` | `Main.java` | `ComisionLlave.java` | No |
 | **R2** | `Cuenta.java`, `CobroCuotaManejo.java` | `Main.java` | `CuentaInfantil.java` | No |
-| R3 | | | | |
-| R4 | | | | |
-| R5 | | | | |
+| **R3** | `TransaccionService.java` | `Main.java` | `PushGateway.java`, `NotificadorMultiple.java` | No |
+| **R4** | `TransaccionService.java` | `TransaccionService.java`, `Main.java` | `SistemaAntifraude.java`, `AntifraudeConsola.va` | No |
+| **R5** | | | | |
 
 **Commit:** uno por requerimiento: `req-1`, `req-2`, . . . , `req-5`
 
