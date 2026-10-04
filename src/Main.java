@@ -14,7 +14,7 @@ public class Main {
         registro.registrar("INTERNACIONAL", new ComisionInternacional());
         registro.registrar("LLAVE", new ComisionLlave());
 
-        Repositorio repositorio = new OracleRepositorio();
+        Repositorio repositorio = new PostgreSQLRepositorio();
         //Notificador notificador = new SmsGateway();//
         Notificador notificador = new NotificadorMultiple(
         new SmsGateway(),
