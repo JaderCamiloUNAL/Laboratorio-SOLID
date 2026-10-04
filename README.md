@@ -321,7 +321,7 @@ Al iniciar este bloque, el docente les entregará una hoja con cinco requerimien
 | Req. | Archivos a modificar en el código original (estimado) | Archivos existentes modificados (real) | Archivos nuevos | ¿Se rompió alguna prueba? |
 |---|---|---|---|---|
 | **R1** | `TransaccionService.java` | `Main.java` | `ComisionLlave.java` | No |
-| R2 | | | | |
+| **R2** | `Cuenta.java`, `CobroCuotaManejo.java` | `Main.java` | `CuentaInfantil.java` | No |
 | R3 | | | | |
 | R4 | | | | |
 | R5 | | | | |
