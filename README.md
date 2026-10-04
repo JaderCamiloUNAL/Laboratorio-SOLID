@@ -1,5 +1,5 @@
 # Laboratorio-SOLID
-Laboratorio numero 2 de la matera de ingenieria de software realizado por Jader Camilo Rodriguez Arboleda y
+Laboratorio numero 2 de la matera de ingenieria de software realizado por Jader Camilo Rodriguez Arboleda y Daniel Oñate Hernandez
 
 ## Qué hace el sistema
   - Transfiere dinero entre cuentas, cobra la comisión según el tipo de transferencia, guarda la
