@@ -15,7 +15,11 @@ public class Main {
         registro.registrar("LLAVE", new ComisionLlave());
 
         Repositorio repositorio = new OracleRepositorio();
-        Notificador notificador = new SmsGateway();
+        //Notificador notificador = new SmsGateway();//
+        Notificador notificador = new NotificadorMultiple(
+        new SmsGateway(),
+        new PushGateway()
+);
         GeneradorComprobante generadorComprobante = new ComprobanteConsola();
         Auditor auditor = new AuditorConsola();
 
