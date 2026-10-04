@@ -284,13 +284,16 @@ Corrijan ProductoBancario para que ningún producto tenga que implementar métod
 InputObject                                                                            SideIndicator
 -----------                                                                            -------------
 [ORACLE] INSERT INTO transacciones VALUES (001-1,001-2, 150000.0, 7500.0)  =>
+
 [AUDITORIA] 2026-10-03T19:23:25.115719900 OTRO_BANCO 001-1 -> 001-2 $150000.0          =>
+
 [ORACLE] INSERT INTO transacciones VALUES (001-1, 001-2, 150000.0, 7500.0) <=
+
 [AUDITORIA] 2026-10-01T17:18:12.308827743 OTRO_BANCO 001-1 -> 001-2 $150000.0          <=
 #### Pregunta de control
 
-¿Pudieron lograr que un mismo generador de extractos funcione para cuentas, tarjetas y créditos a la vez? ¿Qué interfaz necesitó para eso, y por qué no necesitó conocer los demás métodos de cada producto?
-
+- ¿Pudieron lograr que un mismo generador de extractos funcione para cuentas, tarjetas y créditos a la vez? ¿Qué interfaz necesitó para eso, y por qué no necesitó conocer los demás métodos de cada producto?
+  - El mismo generador de extractos puede trabajar con cuentas, tarjetas y créditos mediante la interfaz GenerableExtracto. Esta interfaz contiene únicamente el método relacionado con la generación del extracto, por lo que cada producto que necesite esta funcionalidad la implementa.
 **Commit:** `control-I`
 
 ### Punto de control D
