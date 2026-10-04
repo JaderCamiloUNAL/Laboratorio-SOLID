@@ -368,9 +368,9 @@ Ver el cambio completo y reflexionar sobre lo aprendido.
 | Razones distintas por las que TransaccionService podría cambiar | | |
 | Clases concretas que TransaccionService crea con new | | |
 | Métodos vacíos o que lanzan “no aplica” | | |
-| ¿Se puede probar transferir sin Oracle ni SMS? | | |
-| Número total de archivos | | |
-| Archivos existentes modificados en total en el bloque 4 | | |
+| ¿Se puede probar transferir sin Oracle ni SMS? | No | Si |
+| Número total de archivos | 11 | |
+| Archivos existentes modificados en total en el bloque 4 | 4 | 7 |
 
 3. Respondan en su README:
 
