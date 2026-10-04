@@ -22,12 +22,14 @@ public class Main {
 );
         GeneradorComprobante generadorComprobante = new ComprobanteConsola();
         Auditor auditor = new AuditorConsola();
+        SistemaAntifraude antifraude = new AntifraudeConsola();
 
         TransaccionService servicio = new TransaccionService(
                 repositorio,
                 notificador,
                 generadorComprobante,
                 auditor,
+                antifraude,
                 registro
         );
         servicio.transferir(ana, luis, 150_000, "OTRO_BANCO");

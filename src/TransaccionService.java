@@ -5,18 +5,21 @@ public class TransaccionService {
     private final GeneradorComprobante generadorComprobante;
     private final Auditor auditor;
     private final RegistroComisiones registroComisiones;
+    private final SistemaAntifraude antifraude;
 
     public TransaccionService(
             Repositorio repositorio,
             Notificador notificador,
             GeneradorComprobante generadorComprobante,
             Auditor auditor,
+            SistemaAntifraude antifraude,
             RegistroComisiones registroComisiones) {
 
         this.repositorio = repositorio;
         this.notificador = notificador;
         this.generadorComprobante = generadorComprobante;
         this.auditor = auditor;
+        this.antifraude = antifraude;
         this.registroComisiones = registroComisiones;
     }
 
@@ -41,6 +44,12 @@ public class TransaccionService {
 
         origen.retirar(monto + comision);
         destino.depositar(monto);
+
+        antifraude.analizar(
+                origen.getNumero(),
+                destino.getNumero(),
+                monto
+        );
 
         repositorio.guardarTransaccion(
                 origen.getNumero(),
