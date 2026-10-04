@@ -364,26 +364,29 @@ Ver el cambio completo y reflexionar sobre lo aprendido.
 
 | Métrica | Antes | Después |
 |---|---|---|
-| Líneas del método transferir | | |
+| Líneas del método transferir | 15 | 56 |
 | Razones distintas por las que TransaccionService podría cambiar | 5 | 1 |
 | Clases concretas que TransaccionService crea con new | 4 | 0 |
 | Métodos vacíos o que lanzan “no aplica” | 0 | 0 |
 | ¿Se puede probar transferir sin Oracle ni SMS? | No | Si |
-| Número total de archivos | 11 | 32 |
+| Número total de archivos | 11 | 34 |
 | Archivos existentes modificados en total en el bloque 4 | 4 | 7 |
 
 3. Respondan en su README:
 
-**(a)** El código final tiene muchos más archivos que el original. ¿Es eso un problema? ¿En qué situación sí lo sería?
+- **(a)** El código final tiene muchos más archivos que el original. ¿Es eso un problema? ¿En qué situación sí lo sería?
+  - No necesariamente. Los archivos adicionales separan responsabilidades y hacen que el código sea más fácil de modificar y probar. Sería un problema si se crean clases innecesarias, aumenta demasiado la complejidad o dificulta entender el proyecto.
+    
+- **(b)** ¿En qué requerimiento del bloque 4 se notó más la diferencia entre el código original y el refactorizado? ¿Por qué?
+  - En R5, la migración de Oracle a PostgreSQL. En el código original TransaccionService dependía directamente de OracleRepositorio, mientras que después solo depende de Repositorio, permitiendo cambiar Oracle por PostgreSQL modificando principalmente Main.
 
-**(b)** ¿En qué requerimiento del bloque 4 se notó más la diferencia entre el código original y el refactorizado? ¿Por qué?
+- **(c)** ¿Hubo algún requerimiento que su diseño no aguantó bien? ¿Qué cambiarían?
+  - Sí, R3, las notificaciones SMS y PUSH, porque fue necesario crear un notificador compuesto para enviar ambos tipos de notificación. Mejoraríamos el diseño creando una solución que permita registrar múltiples notificadores desde el inicio.
+    
+- **(d)** ¿Qué les dijo la otra pareja en la revisión cruzada? ¿Están de acuerdo?
 
-**(c)** ¿Hubo algún requerimiento que su diseño no aguantó bien? ¿Qué cambiarían?
-
-**(d)** ¿Qué les dijo la otra pareja en la revisión cruzada? ¿Están de acuerdo?
-
-**(e)** Si tuvieran que convencer a su jefe de invertir dos semanas en refactorizar el backend real del banco, ¿qué argumento usarían, basándose en los datos de hoy?
-
+- **(e)** Si tuvieran que convencer a su jefe de invertir dos semanas en refactorizar el backend real del banco, ¿qué argumento usarían, basándose en los datos de hoy?
+ - Es necesario refactorizar el backend del banco para permitir agregar nuevos requerimientos sin modificar constantemente la logica princioal provocando un posible fallo del sistema. ademas, las mejoras que se pueden aplicar, como con *TransaccionService* que paso de crear directamente sus dependencias a trabajar con abstracciones, reducirian el riesgo y costo de futuros cambios.
 ---------------------------
 # Complementos
 
