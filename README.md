@@ -360,7 +360,295 @@ Ver el cambio completo y reflexionar sobre lo aprendido.
 
 1. Dibujen el diagrama de clases UML del código final y pónganlo al lado del diagrama del bloque 1.
 
-2. Completen la tabla comparativa:
+```mermaid
+classDiagram
+
+    %% =========================
+    %% CUENTAS
+    %% =========================
+
+    class Cuenta {
+        #String numero
+        #String titular
+        #double saldo
+        +getNumero() String
+        +getTitular() String
+        +getSaldo() double
+        +depositar(monto: double)
+        +retirar(monto: double)
+    }
+
+    class CuentaAhorros {
+    }
+
+    class CuentaInfantil {
+        -double retiradoHoy
+        -double LIMITE_DIARIO
+        +retirar(monto: double)
+    }
+
+    class CDT {
+        -LocalDate vencimiento
+        +retirar(monto: double)
+    }
+
+    Cuenta <|-- CuentaAhorros
+    CuentaAhorros <|-- CuentaInfantil
+    Cuenta <|-- CDT
+
+
+    %% =========================
+    %% PRODUCTOS Y CAPACIDADES
+    %% =========================
+
+    class TarjetaCredito {
+        -double deuda
+        -double cupo
+        +retirar(monto: double)
+        +calcularIntereses() double
+        +pagarCuota(monto: double)
+        +generarExtracto() String
+    }
+
+    class CreditoVivienda {
+        -double saldoPendiente
+        +calcularIntereses() double
+        +pagarCuota(monto: double)
+        +generarExtracto() String
+    }
+
+    class GenerableExtracto {
+        <<interface>>
+        +generarExtracto() String
+    }
+
+    class CalculableIntereses {
+        <<interface>>
+        +calcularIntereses() double
+    }
+
+    class PagableCuota {
+        <<interface>>
+        +pagarCuota(monto: double)
+    }
+
+    class Avanceable {
+        <<interface>>
+        +retirar(monto: double)
+    }
+
+    TarjetaCredito ..|> GenerableExtracto
+    TarjetaCredito ..|> CalculableIntereses
+    TarjetaCredito ..|> PagableCuota
+    TarjetaCredito ..|> Avanceable
+
+    CreditoVivienda ..|> GenerableExtracto
+    CreditoVivienda ..|> CalculableIntereses
+    CreditoVivienda ..|> PagableCuota
+
+
+    %% =========================
+    %% COMISIONES
+    %% =========================
+
+    class CalculadoraComision {
+        <<interface>>
+        +calcular(monto: double) double
+    }
+
+    class ComisionMismoBanco {
+        +calcular(monto: double) double
+    }
+
+    class ComisionOtroBanco {
+        +calcular(monto: double) double
+    }
+
+    class ComisionInternacional {
+        +calcular(monto: double) double
+    }
+
+    class ComisionLlave {
+        +calcular(monto: double) double
+    }
+
+    class RegistroComisiones {
+        -Map~String, CalculadoraComision~ calculadoras
+        +registrar(tipo: String, calculadora: CalculadoraComision)
+        +obtener(tipo: String) CalculadoraComision
+    }
+
+    ComisionMismoBanco ..|> CalculadoraComision
+    ComisionOtroBanco ..|> CalculadoraComision
+    ComisionInternacional ..|> CalculadoraComision
+    ComisionLlave ..|> CalculadoraComision
+
+    RegistroComisiones --> CalculadoraComision
+
+
+    %% =========================
+    %% REPOSITORIO
+    %% =========================
+
+    class Repositorio {
+        <<interface>>
+        +guardarTransaccion(origen, destino, monto, comision)
+    }
+
+    class OracleRepositorio {
+        +guardarTransaccion(origen, destino, monto, comision)
+    }
+
+    class PostgreSQLRepositorio {
+        +guardarTransaccion(origen, destino, monto, comision)
+    }
+
+    OracleRepositorio ..|> Repositorio
+    PostgreSQLRepositorio ..|> Repositorio
+
+
+    %% =========================
+    %% NOTIFICACIONES
+    %% =========================
+
+    class Notificador {
+        <<interface>>
+        +enviar(destinatario, mensaje)
+    }
+
+    class SmsGateway {
+        +enviar(destinatario, mensaje)
+    }
+
+    class PushGateway {
+        +enviar(destinatario, mensaje)
+    }
+
+    class NotificadorMultiple {
+        -Notificador sms
+        -Notificador push
+        +NotificadorMultiple(sms, push)
+        +enviar(destinatario, mensaje)
+    }
+
+    SmsGateway ..|> Notificador
+    PushGateway ..|> Notificador
+    NotificadorMultiple ..|> Notificador
+
+    NotificadorMultiple --> Notificador
+
+
+    %% =========================
+    %% COMPROBANTE
+    %% =========================
+
+    class GeneradorComprobante {
+        <<interface>>
+        +generar(origen, destino, monto, comision)
+    }
+
+    class ComprobanteConsola {
+        +generar(origen, destino, monto, comision)
+    }
+
+    ComprobanteConsola ..|> GeneradorComprobante
+
+
+    %% =========================
+    %% AUDITORIA
+    %% =========================
+
+    class Auditor {
+        <<interface>>
+        +registrar(tipo, origen, destino, monto)
+    }
+
+    class AuditorConsola {
+        +registrar(tipo, origen, destino, monto)
+    }
+
+    AuditorConsola ..|> Auditor
+
+
+    %% =========================
+    %% ANTIFRAUDE
+    %% =========================
+
+    class SistemaAntifraude {
+        <<interface>>
+        +analizar(origen, destino, monto)
+    }
+
+    class AntifraudeConsola {
+        +analizar(origen, destino, monto)
+    }
+
+    AntifraudeConsola ..|> SistemaAntifraude
+
+
+    %% =========================
+    %% TRANSACCIONES
+    %% =========================
+
+    class TransaccionService {
+        -Repositorio repositorio
+        -Notificador notificador
+        -GeneradorComprobante generadorComprobante
+        -Auditor auditor
+        -SistemaAntifraude antifraude
+        -RegistroComisiones registroComisiones
+        +transferir(origen, destino, monto, tipo)
+    }
+
+    TransaccionService --> Repositorio
+    TransaccionService --> Notificador
+    TransaccionService --> GeneradorComprobante
+    TransaccionService --> Auditor
+    TransaccionService --> SistemaAntifraude
+    TransaccionService --> RegistroComisiones
+    TransaccionService --> Cuenta
+
+
+    %% =========================
+    %% COBRO DE CUOTA
+    %% =========================
+
+    class CobroCuotaManejo {
+        -double CUOTA
+        +cobrarMensual(cuentas: List~Cuenta~)
+    }
+
+    CobroCuotaManejo --> Cuenta
+
+
+    %% =========================
+    %% MAIN
+    %% =========================
+
+    class Main {
+        +main(args: String[])
+    }
+
+    Main ..> CuentaAhorros : crea
+    Main ..> CuentaInfantil : crea
+    Main ..> CDT : crea
+    Main ..> RegistroComisiones : crea
+    Main ..> ComisionMismoBanco : crea
+    Main ..> ComisionOtroBanco : crea
+    Main ..> ComisionInternacional : crea
+    Main ..> ComisionLlave : crea
+    Main ..> PostgreSQLRepositorio : configura
+    Main ..> NotificadorMultiple : configura
+    Main ..> SmsGateway : crea
+    Main ..> PushGateway : crea
+    Main ..> ComprobanteConsola : crea
+    Main ..> AuditorConsola : crea
+    Main ..> AntifraudeConsola : crea
+    Main ..> TransaccionService : crea
+    Main ..> CobroCuotaManejo : crea
+```
+
+3. Completen la tabla comparativa:
 
 | Métrica | Antes | Después |
 |---|---|---|
