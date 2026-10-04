@@ -294,6 +294,7 @@ InputObject                                                                     
 
 - ¿Pudieron lograr que un mismo generador de extractos funcione para cuentas, tarjetas y créditos a la vez? ¿Qué interfaz necesitó para eso, y por qué no necesitó conocer los demás métodos de cada producto?
   - El mismo generador de extractos puede trabajar con cuentas, tarjetas y créditos mediante la interfaz GenerableExtracto. Esta interfaz contiene únicamente el método relacionado con la generación del extracto, por lo que cada producto que necesite esta funcionalidad la implementa.
+    
 **Commit:** `control-I`
 
 ### Punto de control D
