@@ -296,7 +296,14 @@ Usen el framework de pruebas de su lenguaje (JUnit, pytest, xUnit, Jest, Vitest,
 
 #### Pregunta de control
 
-¿Cuánto tardan en ejecutarse todas sus pruebas? ¿Cuántas líneas de TransaccionService tuvieron que cambiar para poder probarla? ¿Qué habría pasado si intentaran estas mismas pruebas en el bloque 1?
+**¿Cuánto tardan en ejecutarse todas sus pruebas?**
+Tardan apenas unos pocos milisegundos. Al usar dobles de prueba (las clases `Spy` y `Dummy` hechas a mano), eliminamos por completo la necesidad de conectarnos a una base de datos Oracle real o de esperar la respuesta de un proveedor de red para enviar SMS.
+
+**¿Cuántas líneas de `TransaccionService` tuvieron que cambiar para poder probarla?**
+Cero (0) líneas. Como la clase ya había sido refactorizada para recibir sus dependencias por el constructor (aplicando el principio de Inversión de Dependencias en el punto D), simplemente le pasamos los dobles de prueba al momento de instanciarla en el test, sin necesidad de modificar su lógica interna.
+
+**¿Qué habría pasado si intentaran estas mismas pruebas en el bloque 1?**
+Habría sido imposible ejecutar pruebas unitarias aisladas. En el código original del bloque 1, el servicio creaba sus propias dependencias internamente usando `new OracleRepositorio()` y `new SmsGateway()`. Si hubiéramos corrido un test, el sistema habría intentado conectarse a la base de datos real y enviar mensajes de texto de verdad, lo cual haría la prueba lenta, inestable y peligrosa de ejecutar repetidamente.
 
 **Commit:** `bloque-3-pruebas`
 
