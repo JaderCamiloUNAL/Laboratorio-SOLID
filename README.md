@@ -280,6 +280,13 @@ InputObject                                                                   Si
 
 Corrijan ProductoBancario para que ningún producto tenga que implementar métodos que no le aplican.
 
+#### Comparación de salida
+InputObject                                                                            SideIndicator
+-----------                                                                            -------------
+[ORACLE] INSERT INTO transacciones VALUES (001-1,001-2, 150000.0, 7500.0)  =>
+[AUDITORIA] 2026-10-03T19:23:25.115719900 OTRO_BANCO 001-1 -> 001-2 $150000.0          =>
+[ORACLE] INSERT INTO transacciones VALUES (001-1, 001-2, 150000.0, 7500.0) <=
+[AUDITORIA] 2026-10-01T17:18:12.308827743 OTRO_BANCO 001-1 -> 001-2 $150000.0          <=
 #### Pregunta de control
 
 ¿Pudieron lograr que un mismo generador de extractos funcione para cuentas, tarjetas y créditos a la vez? ¿Qué interfaz necesitó para eso, y por qué no necesitó conocer los demás métodos de cada producto?
