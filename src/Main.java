@@ -11,6 +11,7 @@ public class Main {
         registro.registrar("MISMO_BANCO", new ComisionMismoBanco());
         registro.registrar("OTRO_BANCO", new ComisionOtroBanco());
         registro.registrar("INTERNACIONAL", new ComisionInternacional());
+        registro.registrar("LLAVE", new ComisionLlave());
 
         Repositorio repositorio = new OracleRepositorio();
         Notificador notificador = new SmsGateway();
@@ -25,6 +26,7 @@ public class Main {
                 registro
         );
         servicio.transferir(ana, luis, 150_000, "OTRO_BANCO");
+        servicio.transferir(ana, luis, 50_000, "LLAVE");
 
         new CobroCuotaManejo().cobrarMensual(List.of(
                 (CuentaAhorros) ana,
