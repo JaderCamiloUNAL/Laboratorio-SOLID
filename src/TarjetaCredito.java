@@ -19,8 +19,7 @@ public class TarjetaCredito implements GenerableExtracto, CalculableIntereses, P
 
     @Override
     public void pagarCuota(double monto) {
-        deuda -= monto;
-    }
+        deuda -= monto;}
 
     @Override
     public String generarExtracto() {

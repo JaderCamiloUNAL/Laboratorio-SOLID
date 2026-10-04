@@ -12,7 +12,18 @@ public class Main {
         registro.registrar("OTRO_BANCO", new ComisionOtroBanco());
         registro.registrar("INTERNACIONAL", new ComisionInternacional());
 
-        TransaccionService servicio = new TransaccionService(registro);
+        Repositorio repositorio = new OracleRepositorio();
+        Notificador notificador = new SmsGateway();
+        GeneradorComprobante generadorComprobante = new ComprobanteConsola();
+        Auditor auditor = new AuditorConsola();
+
+        TransaccionService servicio = new TransaccionService(
+                repositorio,
+                notificador,
+                generadorComprobante,
+                auditor,
+                registro
+        );
         servicio.transferir(ana, luis, 150_000, "OTRO_BANCO");
 
         new CobroCuotaManejo().cobrarMensual(List.of(
