@@ -23,12 +23,7 @@ public class TransaccionService {
         this.registroComisiones = registroComisiones;
     }
 
-    public void transferir(
-            Cuenta origen,
-            Cuenta destino,
-            double monto,
-            String tipo) {
-
+    private void validarMonto(double monto) {
         if (monto <= 0) {
             throw new IllegalArgumentException("Monto inválido");
         }
@@ -36,6 +31,15 @@ public class TransaccionService {
         if (monto > 5_000_000) {
             throw new IllegalArgumentException("Supera el tope diario");
         }
+    }
+
+    public void transferir(
+            Cuenta origen,
+            Cuenta destino,
+            double monto,
+            String tipo) {
+
+        validarMonto(monto);
 
         CalculadoraComision calculadora =
                 registroComisiones.obtener(tipo);
@@ -76,6 +80,61 @@ public class TransaccionService {
                 tipo,
                 origen.getNumero(),
                 destino.getNumero(),
+                monto
+        );
+    }
+
+    public void pagoServicios(
+            PagadorServiciosPublicos origen,
+            Factura factura,
+            double monto,
+            String tipo) {
+
+        validarMonto(monto);
+
+        if (factura.estaPagada()) {
+            throw new IllegalStateException("La factura ya ha sido pagada");
+        }
+
+        CalculadoraComision calculadora =
+                registroComisiones.obtener(tipo);
+
+        double comision = calculadora.calcular(monto);
+
+        origen.pagar(monto + comision);
+        factura.pagar();
+
+        antifraude.analizar(
+                origen.getNumero(),
+                factura.getReferencia(),
+                monto
+        );
+
+        repositorio.guardarTransaccion(
+                origen.getNumero(),
+                factura.getReferencia(),
+                monto,
+                comision
+        );
+
+        generadorComprobante.generar(
+                origen.getNumero(),
+                factura.getReferencia(),
+                monto,
+                comision
+        );
+
+        notificador.enviar(
+                origen.getTitular(),
+                "Pagaste $" + monto
+                        + " de la factura "
+                        + factura.getReferencia()
+        );
+
+        auditor.registrar(
+                tipo,
+                origen.getNumero(),
+                factura.getReferencia(),
                 monto
         );
     }
