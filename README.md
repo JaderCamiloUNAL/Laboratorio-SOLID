@@ -360,53 +360,319 @@ Ver el cambio completo y reflexionar sobre lo aprendido.
 
 1. Dibujen el diagrama de clases UML del código final y pónganlo al lado del diagrama del bloque 1.
 
-2. Completen la tabla comparativa:
+```mermaid
+classDiagram
+
+    %% =========================
+    %% CUENTAS
+    %% =========================
+
+    class Cuenta {
+        #String numero
+        #String titular
+        #double saldo
+        +getNumero() String
+        +getTitular() String
+        +getSaldo() double
+        +depositar(monto: double)
+        +retirar(monto: double)
+    }
+
+    class CuentaAhorros {
+    }
+
+    class CuentaInfantil {
+        -double retiradoHoy
+        -double LIMITE_DIARIO
+        +retirar(monto: double)
+    }
+
+    class CDT {
+        -LocalDate vencimiento
+        +retirar(monto: double)
+    }
+
+    Cuenta <|-- CuentaAhorros
+    CuentaAhorros <|-- CuentaInfantil
+    Cuenta <|-- CDT
+
+
+    %% =========================
+    %% PRODUCTOS Y CAPACIDADES
+    %% =========================
+
+    class TarjetaCredito {
+        -double deuda
+        -double cupo
+        +retirar(monto: double)
+        +calcularIntereses() double
+        +pagarCuota(monto: double)
+        +generarExtracto() String
+    }
+
+    class CreditoVivienda {
+        -double saldoPendiente
+        +calcularIntereses() double
+        +pagarCuota(monto: double)
+        +generarExtracto() String
+    }
+
+    class GenerableExtracto {
+        <<interface>>
+        +generarExtracto() String
+    }
+
+    class CalculableIntereses {
+        <<interface>>
+        +calcularIntereses() double
+    }
+
+    class PagableCuota {
+        <<interface>>
+        +pagarCuota(monto: double)
+    }
+
+    class Avanceable {
+        <<interface>>
+        +retirar(monto: double)
+    }
+
+    TarjetaCredito ..|> GenerableExtracto
+    TarjetaCredito ..|> CalculableIntereses
+    TarjetaCredito ..|> PagableCuota
+    TarjetaCredito ..|> Avanceable
+
+    CreditoVivienda ..|> GenerableExtracto
+    CreditoVivienda ..|> CalculableIntereses
+    CreditoVivienda ..|> PagableCuota
+
+
+    %% =========================
+    %% COMISIONES
+    %% =========================
+
+    class CalculadoraComision {
+        <<interface>>
+        +calcular(monto: double) double
+    }
+
+    class ComisionMismoBanco {
+        +calcular(monto: double) double
+    }
+
+    class ComisionOtroBanco {
+        +calcular(monto: double) double
+    }
+
+    class ComisionInternacional {
+        +calcular(monto: double) double
+    }
+
+    class ComisionLlave {
+        +calcular(monto: double) double
+    }
+
+    class RegistroComisiones {
+        -Map~String, CalculadoraComision~ calculadoras
+        +registrar(tipo: String, calculadora: CalculadoraComision)
+        +obtener(tipo: String) CalculadoraComision
+    }
+
+    ComisionMismoBanco ..|> CalculadoraComision
+    ComisionOtroBanco ..|> CalculadoraComision
+    ComisionInternacional ..|> CalculadoraComision
+    ComisionLlave ..|> CalculadoraComision
+
+    RegistroComisiones --> CalculadoraComision
+
+
+    %% =========================
+    %% REPOSITORIO
+    %% =========================
+
+    class Repositorio {
+        <<interface>>
+        +guardarTransaccion(origen, destino, monto, comision)
+    }
+
+    class OracleRepositorio {
+        +guardarTransaccion(origen, destino, monto, comision)
+    }
+
+    class PostgreSQLRepositorio {
+        +guardarTransaccion(origen, destino, monto, comision)
+    }
+
+    OracleRepositorio ..|> Repositorio
+    PostgreSQLRepositorio ..|> Repositorio
+
+
+    %% =========================
+    %% NOTIFICACIONES
+    %% =========================
+
+    class Notificador {
+        <<interface>>
+        +enviar(destinatario, mensaje)
+    }
+
+    class SmsGateway {
+        +enviar(destinatario, mensaje)
+    }
+
+    class PushGateway {
+        +enviar(destinatario, mensaje)
+    }
+
+    class NotificadorMultiple {
+        -Notificador sms
+        -Notificador push
+        +NotificadorMultiple(sms, push)
+        +enviar(destinatario, mensaje)
+    }
+
+    SmsGateway ..|> Notificador
+    PushGateway ..|> Notificador
+    NotificadorMultiple ..|> Notificador
+
+    NotificadorMultiple --> Notificador
+
+
+    %% =========================
+    %% COMPROBANTE
+    %% =========================
+
+    class GeneradorComprobante {
+        <<interface>>
+        +generar(origen, destino, monto, comision)
+    }
+
+    class ComprobanteConsola {
+        +generar(origen, destino, monto, comision)
+    }
+
+    ComprobanteConsola ..|> GeneradorComprobante
+
+
+    %% =========================
+    %% AUDITORIA
+    %% =========================
+
+    class Auditor {
+        <<interface>>
+        +registrar(tipo, origen, destino, monto)
+    }
+
+    class AuditorConsola {
+        +registrar(tipo, origen, destino, monto)
+    }
+
+    AuditorConsola ..|> Auditor
+
+
+    %% =========================
+    %% ANTIFRAUDE
+    %% =========================
+
+    class SistemaAntifraude {
+        <<interface>>
+        +analizar(origen, destino, monto)
+    }
+
+    class AntifraudeConsola {
+        +analizar(origen, destino, monto)
+    }
+
+    AntifraudeConsola ..|> SistemaAntifraude
+
+
+    %% =========================
+    %% TRANSACCIONES
+    %% =========================
+
+    class TransaccionService {
+        -Repositorio repositorio
+        -Notificador notificador
+        -GeneradorComprobante generadorComprobante
+        -Auditor auditor
+        -SistemaAntifraude antifraude
+        -RegistroComisiones registroComisiones
+        +transferir(origen, destino, monto, tipo)
+    }
+
+    TransaccionService --> Repositorio
+    TransaccionService --> Notificador
+    TransaccionService --> GeneradorComprobante
+    TransaccionService --> Auditor
+    TransaccionService --> SistemaAntifraude
+    TransaccionService --> RegistroComisiones
+    TransaccionService --> Cuenta
+
+
+    %% =========================
+    %% COBRO DE CUOTA
+    %% =========================
+
+    class CobroCuotaManejo {
+        -double CUOTA
+        +cobrarMensual(cuentas: List~Cuenta~)
+    }
+
+    CobroCuotaManejo --> Cuenta
+
+
+    %% =========================
+    %% MAIN
+    %% =========================
+
+    class Main {
+        +main(args: String[])
+    }
+
+    Main ..> CuentaAhorros : crea
+    Main ..> CuentaInfantil : crea
+    Main ..> CDT : crea
+    Main ..> RegistroComisiones : crea
+    Main ..> ComisionMismoBanco : crea
+    Main ..> ComisionOtroBanco : crea
+    Main ..> ComisionInternacional : crea
+    Main ..> ComisionLlave : crea
+    Main ..> PostgreSQLRepositorio : configura
+    Main ..> NotificadorMultiple : configura
+    Main ..> SmsGateway : crea
+    Main ..> PushGateway : crea
+    Main ..> ComprobanteConsola : crea
+    Main ..> AuditorConsola : crea
+    Main ..> AntifraudeConsola : crea
+    Main ..> TransaccionService : crea
+    Main ..> CobroCuotaManejo : crea
+```
+
+3. Completen la tabla comparativa:
 
 | Métrica | Antes | Después |
 |---|---|---|
-| Líneas del método transferir | | |
-| Razones distintas por las que TransaccionService podría cambiar | | |
-| Clases concretas que TransaccionService crea con new | | |
-| Métodos vacíos o que lanzan “no aplica” | | |
+| Líneas del método transferir | 15 | 56 |
+| Razones distintas por las que TransaccionService podría cambiar | 5 | 1 |
+| Clases concretas que TransaccionService crea con new | 4 | 0 |
+| Métodos vacíos o que lanzan “no aplica” | 0 | 0 |
 | ¿Se puede probar transferir sin Oracle ni SMS? | No | Si |
-| Número total de archivos | 11 | |
+| Número total de archivos | 11 | 34 |
 | Archivos existentes modificados en total en el bloque 4 | 4 | 7 |
 
 3. Respondan en su README:
 
-**(a)** El código final tiene muchos más archivos que el original. ¿Es eso un problema? ¿En qué situación sí lo sería?
+- **(a)** El código final tiene muchos más archivos que el original. ¿Es eso un problema? ¿En qué situación sí lo sería?
+  - No necesariamente. Los archivos adicionales separan responsabilidades y hacen que el código sea más fácil de modificar y probar. Sería un problema si se crean clases innecesarias, aumenta demasiado la complejidad o dificulta entender el proyecto.
+    
+- **(b)** ¿En qué requerimiento del bloque 4 se notó más la diferencia entre el código original y el refactorizado? ¿Por qué?
+  - En R5, la migración de Oracle a PostgreSQL. En el código original TransaccionService dependía directamente de OracleRepositorio, mientras que después solo depende de Repositorio, permitiendo cambiar Oracle por PostgreSQL modificando principalmente Main.
 
-**(b)** ¿En qué requerimiento del bloque 4 se notó más la diferencia entre el código original y el refactorizado? ¿Por qué?
+- **(c)** ¿Hubo algún requerimiento que su diseño no aguantó bien? ¿Qué cambiarían?
+  - Sí, R3, las notificaciones SMS y PUSH, porque fue necesario crear un notificador compuesto para enviar ambos tipos de notificación. Mejoraríamos el diseño creando una solución que permita registrar múltiples notificadores desde el inicio.
+    
+- **(d)** ¿Qué les dijo la otra pareja en la revisión cruzada? ¿Están de acuerdo?
 
-**(c)** ¿Hubo algún requerimiento que su diseño no aguantó bien? ¿Qué cambiarían?
-
-**(d)** ¿Qué les dijo la otra pareja en la revisión cruzada? ¿Están de acuerdo?
-
-**(e)** Si tuvieran que convencer a su jefe de invertir dos semanas en refactorizar el backend real del banco, ¿qué argumento usarían, basándose en los datos de hoy?
-
+- **(e)** Si tuvieran que convencer a su jefe de invertir dos semanas en refactorizar el backend real del banco, ¿qué argumento usarían, basándose en los datos de hoy?
+ - Es necesario refactorizar el backend del banco para permitir agregar nuevos requerimientos sin modificar constantemente la logica princioal provocando un posible fallo del sistema. ademas, las mejoras que se pueden aplicar, como con *TransaccionService* que paso de crear directamente sus dependencias a trabajar con abstracciones, reducirian el riesgo y costo de futuros cambios.
 ---------------------------
-# Complementos
-
-## Bloque 5 Requerimiento para la revisión cruzada
-
-Este requerimiento se implementa sobre el código de la otra pareja, sin pedirles explicaciones. Si no entienden algo, anótenlo en la lista de revisión: esa es justamente la retroalimentación que les sirve.
-
-## R6 Pago de servicios públicos
-
-Los clientes podrán pagar sus facturas de servicios públicos (agua, luz, gas, internet) desde una cuenta, indicando la referencia de la factura y el valor.
-
-El pago tiene una comisión fija de $1.500.
-
-Aplican las mismas validaciones de monto que en las transferencias.
-
-Como cualquier transacción, el pago se guarda, genera comprobante, notifica al cliente y pasa por auditoría y antifraude.
-
-Un CDT no puede pagar servicios.
-
-**Criterio de aceptación:** un pago de $184.300 descuenta $185.800 de la cuenta, guarda la transacción e imprime el comprobante con la referencia de la factura como destino.
-
-**Restricción:** no se permite copiar y pegar la lógica de TransaccionService. Deben reutilizar las piezas que la otra pareja ya construyó.
-
-## Para pensar mientras lo implementan
-
-¿Cuántas de las piezas que necesitan ya existían en el código de la otra pareja? ¿Pudieron usarlas tal como estaban, o tuvieron que modificarlas? Eso dice mucho de qué tan reutilizable quedó su diseño (y el de ustedes).
