@@ -349,11 +349,10 @@ Comprobar si el diseño es fácil de extender para alguien que no lo escribió.
 | No encontramos abstracciones innecesarias (interfaces que no aportan). | Si | |
 
 **Lo mejor del diseño:**
-Lo que mas me gustó fueron las abstracciones hechas para los sistemas antifraude y auditor, que harían sencillo cambiar de sistema concreto sin cambiar la lógica del resto de clases.
+Lo que mas nos gustó fueron las abstracciones de `Auditor.java` y `Antifraude.java`, que harían sencillo cambiar de sistema concreto sin cambiar la lógica del resto de clases. Es una solución muy elegante.
 
 **Lo que nos costó entender o extender:**
-Me costó mucho extender el funcionamiento de TransaccionService. Lo mas fácil era añadir un verificador para reconocer si la cuenta de origne no era un CDT (pero esto velaria los principios de SOLID). Por lo tanto decidimos crear una interfaz de PagadorDeServicios para usarla sobre cuenta de ahorros. Quizá sería más fácil si se pudiera manipular la cuenta como una clase abstracta, pero esto es un error que cometimos nosotros en nuestro código.
-
+Nos costó mucho extender el funcionamiento de `TransaccionService` para realizar pagos. Lo más fácil era añadir un verificador para reconocer si la cuenta de origen no era un CDT pero esto violaría los principios de SOLID. Por lo tanto decidimos crear una interfaz de `PagadorDeServicios` y usarla sobre `CuentaDeAhorro`, con esto podíamos crear un método `pagoDeServicios()` relativamente similar a `transferir()`, pero esto implicó copiar varias líneas de código que quizás podía ser abstraído. Quizá sería más fácil si se pudiera manipular la cuenta como una abstracción, pero esto es un error que cometimos nosotros en nuestro código.
 
 **Commit (en el repositorio de la otra pareja, en una rama):** `revision-cruzada`
 
